@@ -1,0 +1,40 @@
+#ifndef __NB_DRIVER_H_
+#define __NB_DRIVER_H_
+
+#include "stm32f0xx.h"
+
+typedef enum
+{
+  Success_Rec = 0,
+  Time_Out,
+  No_Rec
+}AT_Status;
+
+
+
+
+typedef struct 
+{
+
+  char *AT_SendStr;
+  char *AT_RecStr;
+  uint16_t TimeOut;
+  AT_Status at_Status;
+  uint8_t Rty_Num;		
+}AT_Cmds;
+
+
+typedef enum
+{
+	AT_CFUN0 = 0,
+	AT_CGSN,
+	AT_NRB,
+	AT_NCDP,
+	AT_CFUN1,
+	AT_CIMI,
+}teAT_CmdsNumber;
+
+
+
+
+#endif

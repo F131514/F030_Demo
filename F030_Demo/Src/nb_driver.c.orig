@@ -1,0 +1,15 @@
+#include "nb_driver.h"
+
+
+
+AT_Cmds at_Cmds[] =
+{
+  {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+   {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+ {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+ {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+ {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+ {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+ {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+ {"AT+CFUN=0\r\n","OK",2000,No_Rec,3},
+};
