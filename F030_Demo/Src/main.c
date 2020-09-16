@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "ringbuff.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,8 +71,13 @@ ringbuff_t usart1_ringbuff;
 //开辟一块内存用于缓冲区
 #define USART1_BUFFDATA_SIZE 150
 uint8_t usart1_buffdata[USART1_BUFFDATA_SIZE];
-/* USER CODE END 0 */
 
+#define USER_BUFFDATA_SIZE  10
+uint8_t User_BuffData[USER_BUFFDATA_SIZE];
+
+/* USER CODE END 0 */
+uint8_t Data_Flag = 0;
+uint8_t buff_len;
 /**
   * @brief  The application entry point.
   * @retval int
@@ -83,6 +89,7 @@ int main(void)
 	
    uint8_t data_len;
 	uint8_t i;
+	uint8_t j;
   /* USER CODE END 1 */
   
 
@@ -109,7 +116,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
- printf("ringbuff Port By Mculover666\r\n");
+ printf("ringbuff Port By FJT\r\n");
 
 //初始化ringbuff句柄
 if(1 != ringbuff_init(&usart1_ringbuff, (uint8_t*)usart1_buffdata, USART1_BUFFDATA_SIZE))
@@ -126,36 +133,44 @@ HAL_UART_Receive_IT(&huart2, (uint8_t*)&recv_data, 1);
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_4);
+	  //HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_4);
 	   HAL_Delay(100);
 	  HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_0);
-	  
-	  
+	  	
+		buff_len = sizeof(User_BuffData);
+
     /* USER CODE END WHILE */
- while((len = ringbuff_read(&usart1_ringbuff, (uint8_t*)&read_data, sizeof(read_data))) > 0)
- {
-  /* 捕获起始标志 */
-  if(read_data == 0x3F)
-  {
-   //读取数据字节数，最大支持0xFF
-   if((len = ringbuff_read(&usart1_ringbuff, (uint8_t*)&read_data, sizeof(read_data))) > 0)
-   {
-    data_len = read_data;
-    printf("your data has %d byte(s):\r\n\t", data_len);
-   }
-   
-   //提取data_len个数据
-   for(i = 0; i < data_len; i++)
-   {
-    if((len = ringbuff_read(&usart1_ringbuff, (uint8_t*)&read_data, sizeof(read_data))) > 0)
-    {
-     printf("[0x%02x] ", read_data); 
-    }
-   }
-   printf("over\r\n");
-  }
- }
+    /* USER CODE BEGIN 3 */
+	while((len = ringbuff_read(&usart1_ringbuff, &User_BuffData, sizeof(User_BuffData))) > 0)
+	{
+	
+		/* 捕获起始标志 */
+		if(User_BuffData[0] == 0x3F)
+		{
+			/*
+			//读取数据字节数，最大支持0xFF
+			if((len = ringbuff_read(&usart1_ringbuff, &User_BuffData, sizeof(User_BuffData))) > 0)
+			{
+				data_len = User_BuffData[0];
+				printf("your data has %d byte(s):\r\n\t", data_len);
+			}
+			*/
+			//提取data_len个数据
+			for(i = 2; i < User_BuffData[1]; i++)
+			{
+				ringbuff_read(&usart1_ringbuff, &User_BuffData, sizeof(User_BuffData));	
+			}
+			for (j =0;j<10;j++)
+			{
+			
+			printf("[%d]",User_BuffData[j]);
+			}
+			printf("over\r\n");
+		}
+	}
  HAL_Delay(200);
+
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -213,6 +228,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
   /* 将接收到的数据写入缓冲区 */
   ringbuff_write(&usart1_ringbuff, &recv_data, 1);
+		Data_Flag = 1;
         //重新使能串口接收中断
         HAL_UART_Receive_IT(huart, (uint8_t*)&recv_data, 1);
     }
